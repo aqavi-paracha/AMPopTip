@@ -80,7 +80,17 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
     AMPopTipActionAnimationNone
 };
 
+@class AMPopTip;
+
+@protocol AMPopTipDelegate <NSObject>
+
+- (void)didHideAMPopTip:(AMPopTip *)view;
+
+@end
+
 @interface AMPopTip : UIView
+
+@property (nonatomic, strong) id<AMPopTipDelegate> delegate;
 
 /**-----------------------------------------------------------------------------
  * @name AMPopTip

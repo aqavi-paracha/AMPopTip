@@ -492,6 +492,10 @@
     } else if (self.superview) {
         [self performExitAnimation:completion];
     }
+    
+    if ([self.delegate respondsToSelector:@selector(didHideAMPopTip:)]) {
+        [self.delegate didHideAMPopTip:self];
+    }
 }
 
 - (void)updateText:(NSString *)text {

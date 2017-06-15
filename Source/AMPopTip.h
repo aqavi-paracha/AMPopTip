@@ -80,7 +80,17 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
     AMPopTipActionAnimationNone
 };
 
+@class AMPopTip;
+
+@protocol AMPopTipDelegate <NSObject>
+
+- (void)didHideAMPopTip:(AMPopTip *)view;
+
+@end
+
 @interface AMPopTip : UIView
+
+@property (nonatomic, strong) id<AMPopTipDelegate> delegate;
 
 /**-----------------------------------------------------------------------------
  * @name AMPopTip
@@ -91,7 +101,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  *
  * Create a new popotip object
  */
-+ (nonnull instancetype)popTip;
++ (instancetype)popTip;
 
 /** Show the popover
  *
@@ -104,7 +114,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param view The view that will hold the popover.
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  */
-- (void)showText:(nonnull NSString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(nonnull UIView *)view fromFrame:(CGRect)frame;
+- (void)showText:(NSString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(UIView *)view fromFrame:(CGRect)frame;
 
 /** Show the popover
  *
@@ -117,7 +127,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param view The view that will hold the popover.
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  */
-- (void)showAttributedText:(nonnull NSAttributedString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(nonnull UIView *)view fromFrame:(CGRect)frame;
+- (void)showAttributedText:(NSAttributedString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(UIView *)view fromFrame:(CGRect)frame;
 
 /** Show the popover with a custom view
  *
@@ -129,7 +139,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param view The view that will hold the popover.
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  */
-- (void)showCustomView:(nonnull UIView *)customView direction:(AMPopTipDirection)direction inView:(nonnull UIView *)view fromFrame:(CGRect)frame;
+- (void)showCustomView:(UIView *)customView direction:(AMPopTipDirection)direction inView:(UIView *)view fromFrame:(CGRect)frame;
 
 /** Show the popover
  *
@@ -143,7 +153,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  * @param interval The time interval that determines when the poptip will self-dismiss
  */
-- (void)showText:(nonnull NSString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(nonnull UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
+- (void)showText:(NSString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
 
 /** Show the popover
  *
@@ -157,7 +167,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  * @param interval The time interval that determines when the poptip will self-dismiss
  */
-- (void)showAttributedText:(nonnull NSAttributedString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(nonnull UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
+- (void)showAttributedText:(NSAttributedString *)text direction:(AMPopTipDirection)direction maxWidth:(CGFloat)maxWidth inView:(UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
 
 /** Show the popover with a custom view
  *
@@ -170,7 +180,7 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  * @param frame The originating frame. The popover's arrow will point to the center of this frame.
  * @param interval The time interval that determines when the poptip will self-dismiss
  */
-- (void)showCustomView:(nonnull UIView *)customView direction:(AMPopTipDirection)direction inView:(nonnull UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
+- (void)showCustomView:(UIView *)customView direction:(AMPopTipDirection)direction inView:(UIView *)view fromFrame:(CGRect)frame duration:(NSTimeInterval)interval;
 
 /** Hide the popover
  *
@@ -179,18 +189,12 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
  */
 - (void)hide;
 
-/** Hide the popover with the option to force the removal. This will ignore current animations.
- *
- * @param forced Force the removal.
- */
-- (void)hideForced:(BOOL)forced;
-
 /** Update the text
  *
  * Set the new text shown in the poptip
  * @param text The new text
  */
-- (void)updateText:(nonnull NSString *)text;
+- (void)updateText:(NSString *)text;
 
 /** Makes the popover perform the action animation
  *
@@ -209,12 +213,11 @@ typedef NS_ENUM(NSInteger, AMPopTipActionAnimation) {
 * -----------------------------------------------------------------------------
 */
 
-NS_ASSUME_NONNULL_BEGIN
 /** Font
  *
  * Holds the UIFont used in the popover
  */
-@property (nonatomic, strong) UIFont *font;
+@property (nonatomic, strong) UIFont *font UI_APPEARANCE_SELECTOR;
 
 /** Text Color
  *
@@ -371,25 +374,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) CGFloat edgeMargin UI_APPEARANCE_SELECTOR;
 
-/** Offset for the Bubble
- *
- * Holds the offset between the bubble and origin
- */
-@property (nonatomic, assign) CGFloat bubbleOffset UI_APPEARANCE_SELECTOR;
-
-/** Background Mask Color
- *
- * Color of the mask that is going to dim the background when the pop up is visible
- */
-@property (nonatomic, strong) UIColor *maskColor UI_APPEARANCE_SELECTOR;
-
-/** Show Background Mask
- *
- * Flag to enable or disable background mask
- */
-@property (nonatomic, assign) BOOL shouldShowMask UI_APPEARANCE_SELECTOR;
-
-
 /** The frame the poptip is pointing to
  *
  * Holds the CGrect with the rect the tip is pointing to
@@ -433,25 +417,24 @@ NS_ASSUME_NONNULL_BEGIN
 * The default direction is UISwipeGestureRecognizerDirectionRight if this is not set.
 */
 @property (nonatomic, assign) UISwipeGestureRecognizerDirection swipeRemoveGestureDirection;
-NS_ASSUME_NONNULL_END
 
 /** Tap handler
  *
  * A block that will be fired when the user taps the popover.
  */
-@property (nonatomic, copy) void (^_Nullable tapHandler)();
+@property (nonatomic, copy) void (^tapHandler)();
 
 /** Dismiss handler
  *
  * A block that will be fired when the popover appears.
  */
-@property (nonatomic, copy) void (^_Nullable appearHandler)();
+@property (nonatomic, copy) void (^appearHandler)();
 
 /** Dismiss handler
  *
  * A block that will be fired when the popover is dismissed.
  */
-@property (nonatomic, copy) void (^_Nullable dismissHandler)();
+@property (nonatomic, copy) void (^dismissHandler)();
 
 /** Entrance animation
  *
@@ -460,7 +443,7 @@ NS_ASSUME_NONNULL_END
  * Please note that the poptip will be automatically added as a subview before firing the block
  * Remember to call the completion block provided
  */
-@property (nonatomic, copy) void (^_Nullable entranceAnimationHandler)(void (^_Nonnull completion)(void));
+@property (nonatomic, copy) void (^entranceAnimationHandler)(void (^completion)(void));
 
 /** Exit animation
  *
@@ -468,7 +451,7 @@ NS_ASSUME_NONNULL_END
  * when using a AMPopTipActionAnimationCustom exit animation type.
  * Remember to call the completion block provided
  */
-@property (nonatomic, copy) void (^_Nullable exitAnimationHandler)(void (^_Nonnull completion)(void));
+@property (nonatomic, copy) void (^exitAnimationHandler)(void (^completion)(void));
 
 /** Arrow position
  *
@@ -480,19 +463,12 @@ NS_ASSUME_NONNULL_END
  *
  * A read only reference to the view containing the poptip
  */
-@property (nonatomic, weak, readonly) UIView *_Nullable containerView;
+@property (nonatomic, weak, readonly) UIView *containerView;
 
 /** Direction
  *
  * The direction from which the poptip is shown. Read only.
  */
 @property (nonatomic, assign, readonly) AMPopTipDirection direction;
-
-/** Background Mask
- *
- * The view that dims the background (including the button that triggered PopTip.
- * The mask by appears with fade in effect only.
- */
-@property(nullable, nonatomic, strong, readonly) UIView *backgroundMask;
 
 @end

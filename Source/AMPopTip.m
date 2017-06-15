@@ -30,7 +30,6 @@
 @property (nonatomic, assign) CGRect textBounds;
 @property (nonatomic, assign) CGFloat maxWidth;
 @property (nonatomic, strong) UIView *customView;
-@property (nonatomic, strong, readwrite) UIView *backgroundMask;
 
 @end
 
@@ -64,19 +63,6 @@
     return self;
 }
 
--(nullable UIView *)backgroundMask{
-    if (!self.shouldShowMask) {
-        [_backgroundMask removeFromSuperview];
-        return nil;
-    }
-    if (_backgroundMask == nil) {
-        _backgroundMask = [[UIView alloc]initWithFrame:self.containerView.bounds];
-        _backgroundMask.alpha = 0.6;
-        _backgroundMask.backgroundColor = self.maskColor;
-    }
-    return _backgroundMask;
-}
-
 - (void)commonInit {
     _paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     _textAlignment = NSTextAlignmentCenter;
@@ -90,6 +76,7 @@
     _arrowSize = kDefaultArrowSize;
     _animationIn = kDefaultAnimationIn;
     _animationOut = kDefaultAnimationOut;
+    _isVisible = NO;
     _shouldDismissOnTapOutside = YES;
     _edgeMargin = kDefaultEdgeMargin;
     _edgeInsets = kDefaultEdgeInsets;
@@ -103,20 +90,13 @@
     _actionPulseOffset = kDefaultPulseOffset;
     _actionAnimationIn = kDefaultBounceAnimationIn;
     _actionAnimationOut = kDefaultBounceAnimationOut;
-    _bubbleOffset = kDefaultBubbleOffset;
-    _shouldShowMask = NO;
-    _maskColor = kDefaultMaskColor;
-
     _tapRemoveGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapRemoveGestureHandler)];
     _swipeRemoveGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeRemoveGestureHandler)];
 }
 
-- (BOOL)isVisible {
-    return self.superview != nil;
-}
-
 - (void)layoutSubviews {
     [super layoutSubviews];
+//    [self setup];
 }
 
 - (void)setup {
@@ -158,30 +138,6 @@
         }
 
         frame.origin.y += offset;
-        
-        // Make sure that the bubble doesn't leaves the boundaries of the view
-        CGFloat yPoint = (self.direction == AMPopTipDirectionUp) ? frame.size.height : self.fromFrame.origin.y + self.fromFrame.size.height - frame.origin.y + offset;
-        CGPoint arrowPosition = (CGPoint){ self.fromFrame.origin.x + self.fromFrame.size.width / 2 - frame.origin.x, yPoint };
-        
-        if (self.bubbleOffset > 0 && arrowPosition.x < self.bubbleOffset) {
-            self.bubbleOffset = arrowPosition.x - self.arrowSize.width;
-        } else if (self.bubbleOffset < 0 && frame.size.width < fabs(self.bubbleOffset)) {
-            self.bubbleOffset = -(arrowPosition.x - self.arrowSize.width);
-        } else if (self.bubbleOffset < 0 && (frame.origin.x - arrowPosition.x) < fabs(self.bubbleOffset)) {
-            self.bubbleOffset = -(self.arrowSize.width + self.edgeMargin);
-        }
-        
-        // Make sure that the bubble doesn't leaves the boundaries of the view
-        CGFloat leftSpace = frame.origin.x - self.containerView.frame.origin.x;
-        CGFloat rightSpace = self.containerView.frame.size.width - leftSpace - frame.size.width;
-        
-        if (self.bubbleOffset < 0 && leftSpace < fabs(self.bubbleOffset)) {
-            self.bubbleOffset = -leftSpace + self.edgeMargin;
-        } else if (self.bubbleOffset > 0 && rightSpace < self.bubbleOffset) {
-            self.bubbleOffset = rightSpace - self.edgeMargin;
-        }
-        
-        frame.origin.x += self.bubbleOffset;
 
     } else if (self.direction == AMPopTipDirectionLeft || self.direction == AMPopTipDirectionRight) {
         frame.size = (CGSize){ self.textBounds.size.width + self.padding * 2.0 + self.edgeInsets.left + self.edgeInsets.right + self.arrowSize.height, self.textBounds.size.height + self.padding * 2.0 + self.edgeInsets.top + self.edgeInsets.bottom};
@@ -201,30 +157,6 @@
         if (y < 0) { y = self.edgeMargin; }
         if (y + frame.size.height > self.containerView.bounds.size.height) { y = self.containerView.bounds.size.height - frame.size.height - self.edgeMargin; }
         frame.origin = (CGPoint){ x, y };
-        
-        // Make sure that the bubble doesn't leaves the boundaries of the view
-        CGFloat xPoint = (self.direction == AMPopTipDirectionLeft) ? self.fromFrame.origin.x - frame.origin.x + offset : self.fromFrame.origin.x + self.fromFrame.size.width - frame.origin.x + offset;
-        
-        CGPoint arrowPosition = (CGPoint){ xPoint, self.fromFrame.origin.y + self.fromFrame.size.height / 2 - frame.origin.y };
-        
-        if (self.bubbleOffset > 0 && arrowPosition.y < self.bubbleOffset) {
-            self.bubbleOffset = arrowPosition.y - self.arrowSize.width;
-        } else if (self.bubbleOffset < 0 && frame.size.height < fabs(self.bubbleOffset)) {
-            self.bubbleOffset = -(arrowPosition.y - self.arrowSize.height);
-        }
-        
-        // Make sure that the bubble doesn't leaves the boundaries of the view
-        CGFloat topSpace = frame.origin.y - self.containerView.frame.origin.y;
-        CGFloat bottomSpace = self.containerView.frame.size.height - topSpace - frame.size.height;
-        
-        if (self.bubbleOffset < 0 && topSpace < fabs(self.bubbleOffset)) {
-            self.bubbleOffset = -topSpace + self.edgeMargin;
-        } else if (self.bubbleOffset > 0 && bottomSpace < self.bubbleOffset) {
-            self.bubbleOffset = bottomSpace - self.edgeMargin;
-        }
-        
-        frame.origin.y += self.bubbleOffset;
-        
     } else {
         frame.size = (CGSize){ self.textBounds.size.width + self.padding * 2.0 + self.edgeInsets.left + self.edgeInsets.right, self.textBounds.size.height + self.padding * 2.0 + self.edgeInsets.top + self.edgeInsets.bottom };
         frame.origin = (CGPoint){ CGRectGetMidX(self.fromFrame) - frame.size.width / 2, CGRectGetMidY(self.fromFrame) - frame.size.height / 2 + offset };
@@ -295,7 +227,6 @@
     }
     
     self.gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    [self.gestureRecognizer setCancelsTouchesInView:NO];
     [self addGestureRecognizer:self.gestureRecognizer];
     [self setNeedsDisplay];
 }
@@ -352,8 +283,10 @@
 }
 
 - (void)show {
+    if (self.isVisible || self.isAnimating) {
+        return;
+    }
     self.isAnimating = YES;
-    [self setup];
     [self setNeedsLayout];
     [self performEntranceAnimation:^{
         [self.containerView addGestureRecognizer:self.tapRemoveGesture];
@@ -364,6 +297,7 @@
         if (self.actionAnimation != AMPopTipActionAnimationNone) {
             [self startActionAnimation];
         }
+        self.isVisible = YES;
         self.isAnimating = NO;
     }];
 }
@@ -376,7 +310,6 @@
     self.containerView = view;
     self.maxWidth = maxWidth;
     _fromFrame = frame;
-    [self.customView removeFromSuperview];
     self.customView = nil;
 
     [self show];
@@ -390,7 +323,6 @@
     self.containerView = view;
     self.maxWidth = maxWidth;
     _fromFrame = frame;
-    [self.customView removeFromSuperview];
     self.customView = nil;
 
     [self show];
@@ -403,8 +335,8 @@
     self.containerView = view;
     self.maxWidth = customView.frame.size.width;
     _fromFrame = frame;
-    [self.customView removeFromSuperview];
     self.customView = customView;
+
     [self addSubview:self.customView];
     [self.customView layoutIfNeeded];
 
@@ -453,45 +385,35 @@
 }
 
 - (void)hide {
-    [self hideForced:NO];
-}
-
-- (void)hideForced:(BOOL)forced {
-    if (!forced && self.isAnimating) {
+    if (!self.isVisible || self.isAnimating) {
         return;
     }
-    [self.layer removeAllAnimations];
-
     self.isAnimating = YES;
     [self.dismissTimer invalidate];
     self.dismissTimer = nil;
     [self.containerView removeGestureRecognizer:self.tapRemoveGesture];
     [self.containerView removeGestureRecognizer:self.swipeRemoveGesture];
-
-    void (^completion)() = ^{
-        [self.customView removeFromSuperview];
-        self.customView = nil;
-        [self stopActionAnimation];
-        [self.backgroundMask removeFromSuperview];
-        [self removeFromSuperview];
-        [self.layer removeAllAnimations];
-        self.transform = CGAffineTransformIdentity;
-        self->_isAnimating = NO;
-        if (self.dismissHandler) {
-            self.dismissHandler();
-        }
-    };
-
-    BOOL isActive = YES;
-#if NS_EXTENSION_UNAVAILABLE_IOS
-    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
-    isActive = (state == UIApplicationStateActive);
-#endif
-    if (!isActive) {
-        completion();
-    } else if (self.superview) {
-        [self performExitAnimation:completion];
+    if (self.superview) {
+        
+        [self performExitAnimation:^{
+            [self.customView removeFromSuperview];
+            self.customView = nil;
+            [self stopActionAnimation];
+            [self removeFromSuperview];
+            [self.layer removeAllAnimations];
+            self.transform = CGAffineTransformIdentity;
+            self->_isVisible = NO;
+            self->_isAnimating = NO;
+            if (self.dismissHandler) {
+                self.dismissHandler();
+            }
+        }];
     }
+    
+    if ([self.delegate respondsToSelector:@selector(didHideAMPopTip:)]) {
+        [self.delegate didHideAMPopTip:self];
+    }
+    
 }
 
 - (void)updateText:(NSString *)text {

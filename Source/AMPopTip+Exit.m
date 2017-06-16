@@ -53,7 +53,7 @@
     
     [UIView animateWithDuration:self.animationOut delay:self.delayOut options:(UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         self.transform = CGAffineTransformMakeScale(0.000001, 0.000001);
-        self.backgroundMask.alpha = 0;
+//        self.backgroundMask.alpha = 0;
     } completion:^(BOOL completed){
         if (completed && completion) {
             completion();
@@ -65,7 +65,7 @@
     self.alpha = 1.0;
     [UIView animateWithDuration:self.animationOut delay:self.delayOut options:(UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         self.alpha = 0.0;
-        self.backgroundMask.alpha = 0;
+//        self.backgroundMask.alpha = 0;
     } completion:^(BOOL completed){
         if (completed && completion) {
             completion();

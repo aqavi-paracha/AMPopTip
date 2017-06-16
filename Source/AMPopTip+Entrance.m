@@ -25,7 +25,7 @@
             break;
         }
         case AMPopTipEntranceAnimationCustom: {
-            [self.containerView addSubview:self.backgroundMask];
+//            [self.containerView addSubview:self.backgroundMask];
             [self.containerView addSubview:self];
             if (self.entranceAnimationHandler) {
                 self.entranceAnimationHandler(^{
@@ -34,13 +34,13 @@
             }
         }
         case AMPopTipEntranceAnimationNone: {
-            [self.containerView addSubview:self.backgroundMask];
+//            [self.containerView addSubview:self.backgroundMask];
             [self.containerView addSubview:self];
             completion();
             break;
         }
         default: {
-            [self.containerView addSubview:self.backgroundMask];
+//            [self.containerView addSubview:self.backgroundMask];
             [self.containerView addSubview:self];
             completion();
             break;
@@ -71,12 +71,12 @@
             break;
     }
     
-    [self.containerView addSubview:self.backgroundMask];
+//    [self.containerView addSubview:self.backgroundMask];
     [self.containerView addSubview:self];
 
     [UIView animateWithDuration:self.animationIn delay:self.delayIn usingSpringWithDamping:0.6 initialSpringVelocity:1.5 options:(UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         self.transform = CGAffineTransformIdentity;
-        self.backgroundMask.alpha = 1.0;
+//        self.backgroundMask.alpha = 1.0;
     } completion:^(BOOL completed){
         if (completed && completion) {
             completion();
@@ -86,12 +86,12 @@
 
 - (void)entranceScale:(void (^)())completion {
     self.transform = CGAffineTransformMakeScale(0, 0);
-    [self.containerView addSubview:self.backgroundMask];
+//    [self.containerView addSubview:self.backgroundMask];
     [self.containerView addSubview:self];
 
     [UIView animateWithDuration:self.animationIn delay:self.delayIn usingSpringWithDamping:0.6 initialSpringVelocity:1.5 options:(UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         self.transform = CGAffineTransformIdentity;
-        self.backgroundMask.alpha = 1.0;
+//        self.backgroundMask.alpha = 1.0;
     } completion:^(BOOL completed){
         if (completed && completion) {
             completion();
@@ -100,13 +100,13 @@
 }
 
 - (void)entranceFadeIn:(void (^)())completion {
-    [self.containerView addSubview:self.backgroundMask];
+//    [self.containerView addSubview:self.backgroundMask];
     [self.containerView addSubview:self];
 
     self.alpha = 0.0;
     [UIView animateWithDuration:self.animationIn delay:self.delayIn options:(UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         self.alpha = 1.0;
-        self.backgroundMask.alpha = 1.0;
+//        self.backgroundMask.alpha = 1.0;
     } completion:^(BOOL completed){
         if (completed && completion) {
             completion();
